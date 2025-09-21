@@ -1,35 +1,40 @@
-const games = [
-  {
-    id: "71ebac36-3cee-41c7-9f1a-2838344bc9c2",
-    title: "Elden Ring - PlayStation 5",
-    url: "https://a.co/d/bstbEAf",
-  },
-  {
-    id: "64e3200f-50ed-4c0a-86ba-0de7d9b83915",
-    title: "The Legend Of Zelda: Breath Of The Wild - Nintendo Switch",
-    url: "https://a.co/d/2mhNntu",
-  },
-  {
-    id: "035fe993-8535-4080-a4bb-b4ec924615a7",
-    title: "Nioh Collection - PlayStation 5",
-    url: "https://a.co/d/92I9PSA",
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+
+const fetchGames = () => {
+  return fetch("http://localhost:3000/posts")
+    .then((res) => res.json())
+    .then((data) => data)
+}
+
+console.log(fetchGames())
 
 const Games = () => {
+  const { isError, isLoading, isSuccess, error, data } = useQuery({
+    queryKey: ["games"],
+    queryFn: fetchGames,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  })
+
   return (
-    <div className="games">
-      <h2>Jogos</h2>
-      <ul>
-        {games.map((game) => (
-          <li key={game.id}>
-            <a href={game.url} target="_blank" rel="noreferrer">
-              {game.title}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      {isError && <p>{error.message}</p>}
+      {isLoading && <p>Carregando Informações...</p>}
+      {isSuccess && (
+        <div className="games">
+          <h2>Jogos</h2>
+          <ul>
+            {data.map((game) => (
+              <li key={game.id}>
+                <a href={game.url} target="_blank" rel="noreferrer">
+                  {game.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   )
 }
 
