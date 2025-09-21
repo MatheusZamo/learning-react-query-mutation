@@ -5,8 +5,6 @@ const fetchGames = () =>
     .then((res) => res.json())
     .then((data) => data)
 
-console.log(fetchGames())
-
 const Games = () => {
   const { isError, isLoading, isSuccess, error, data } = useQuery({
     queryKey: ["games"],
