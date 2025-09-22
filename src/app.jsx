@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 const fetchGames = () =>
   fetch("http://localhost:3000/games").then((res) => res.json())
@@ -34,33 +34,49 @@ const Games = () => {
 }
 
 const Form = () => {
-  const addGame = (e) => {
+  const queryClient = useQueryClient()
+  const addGameMutation = useMutation({
+    mutationFn: (newGame) =>
+      fetch("http://localhost:3000/games", {
+        method: "POST",
+        body: JSON.stringify(newGame),
+        headers: { "Content-type": "application/json" },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["games"] }),
+  })
+
+  const handleFormSubmit = (e) => {
     e.preventDefault()
     const { title, url } = e.target.elements
-    fetch("http://localhost:3000/games", {
-      method: "POST",
-      body: JSON.stringify({
-        id: crypto.randomUUID(),
-        title: title.value,
-        url: url.value,
-      }),
-      headers: { "Content-type": "application/json" },
+    addGameMutation.mutate({
+      id: crypto.randomUUID(),
+      title: title.value,
+      url: url.value,
     })
   }
   return (
     <div>
-      <h3>Adicionar Jogo</h3>
-      <form onSubmit={addGame}>
-        <label>
-          Nome:
-          <input name="title" type="text" autoFocus />
-        </label>
-        <label>
-          Link:
-          <input name="url" type="url" />
-        </label>
-        <button>Adicionar</button>
-      </form>
+      <fieldset disabled={addGameMutation.isPending}>
+        <legend>Adicionar Jogo</legend>
+        <form onSubmit={handleFormSubmit}>
+          <label>
+            Nome:
+            <input name="title" type="text" autoFocus />
+          </label>
+          <label>
+            Link:
+            <input name="url" type="url" />
+          </label>
+          <button>Adicionar</button>
+        </form>
+      </fieldset>
+      {addGameMutation.isPending && <p>Adicionando jogo...</p>}
+      {addGameMutation.isError && (
+        <p>
+          Algo inesperado aconteceu. Você pode tentar novamente ?
+          {addGameMutation.error}
+        </p>
+      )}
     </div>
   )
 }
