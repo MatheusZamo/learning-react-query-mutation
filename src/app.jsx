@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 const fetchGames = () =>
-  fetch("http://localhost:3000/posts")
+  fetch("http://localhost:3000/games")
     .then((res) => res.json())
     .then((data) => data)
 
